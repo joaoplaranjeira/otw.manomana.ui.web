@@ -40,13 +40,19 @@ export function NumberStepper({ label, name, value, onChange, min, max, placehol
     onChange(String(Math.min(max, Math.max(min, Number(value)))));
   };
 
+  const handleInvalid = (event: React.InvalidEvent<HTMLInputElement>) => {
+    if (event.currentTarget.validity.stepMismatch) {
+      event.currentTarget.setCustomValidity(`${label}: introduz um valor de ${step} em ${step} ${suffix}, entre ${min} e ${max} ${suffix}.`);
+    }
+  };
+
   return (
     <div className="field field--stepper">
       <label className="field__label" htmlFor={name}>{label}</label>
       <div className="number-stepper">
         <button type="button" onClick={() => adjust(-step)} disabled={value !== "" && Number(value) <= min} aria-label={`Diminuir ${label.toLowerCase()}`}>−</button>
         <span className="number-stepper__value">
-          <input id={name} name={name} type="number" inputMode="numeric" min={min} max={max} step={step} placeholder={String(placeholder)} value={value} onChange={(event) => onChange(event.target.value)} onBlur={normalize} autoFocus={autoFocus} required={required} />
+          <input id={name} name={name} type="number" inputMode="numeric" min={min} max={max} step={step} placeholder={String(placeholder)} value={value} onChange={(event) => { event.currentTarget.setCustomValidity(""); onChange(event.target.value); }} onInvalid={handleInvalid} onBlur={normalize} autoFocus={autoFocus} required={required} />
           <span>{suffix}</span>
         </span>
         <button type="button" onClick={() => adjust(step)} disabled={value !== "" && Number(value) >= max} aria-label={`Aumentar ${label.toLowerCase()}`}>+</button>
