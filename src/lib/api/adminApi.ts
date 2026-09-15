@@ -45,6 +45,10 @@ export const adminApi = {
     await apiRequest<void>("/api/admin/birth/publish", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
     return eventApi.get();
   },
+  async reset(token: string): Promise<void> {
+    if (isMock()) return mockStore.reset();
+    await apiRequest<void>("/api/admin/event/reset", { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+  },
   async removePrediction(id: string, token: string) {
     if (isMock()) return mockStore.removePrediction(id);
     return apiRequest<void>(`/api/admin/predictions/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });

@@ -51,6 +51,10 @@ export const mockStore = {
   removePrediction(id: string) {
     write(PREDICTIONS_KEY, this.getPredictions().filter((item) => item.id !== id));
   },
+  reset() {
+    write(EVENT_KEY, { status: "Open" } satisfies EventData);
+    write(PREDICTIONS_KEY, [] satisfies Prediction[]);
+  },
   getStats(): PredictionStats {
     const predictions = this.getPredictions();
     const boy = predictions.filter((item) => item.gender === "Boy").length;
