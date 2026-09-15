@@ -1,7 +1,10 @@
 const isMock = () => process.env.NEXT_PUBLIC_API_MODE !== "remote";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");
 
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/backend${path}`, {
+  if (!apiBaseUrl) throw new Error("NEXT_PUBLIC_API_BASE_URL não configurado.");
+
+  const response = await fetch(`${apiBaseUrl}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",

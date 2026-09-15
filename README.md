@@ -1,10 +1,10 @@
 # mano mana
 
-Frontend do **manomana.pt**, uma experiência familiar para registar palpites sobre a chegada do “Dino”. Construído com Next.js, React, TypeScript e Tailwind CSS.
+Frontend estático do **manomana.pt**, uma experiência familiar para registar palpites sobre a chegada do “Dino”. Construído com Next.js, React, TypeScript e Tailwind CSS.
 
 ## Arranque rápido com Docker Desktop
 
-O modo predefinido liga à Web API disponível no computador anfitrião em `http://localhost:8080`. Dentro do contentor, o endereço é traduzido para `http://host.docker.internal:8080`.
+O modo predefinido liga, a partir do browser, à Web API disponível em `http://localhost:8080`.
 
 ```bash
 docker compose up --build
@@ -22,22 +22,40 @@ Abrir [http://localhost:3001](http://localhost:3001).
 
 ## Web API por ambiente
 
-O browser comunica sempre com `/backend`. Uma route handler do Next.js reencaminha os pedidos para `API_BASE_URL`, mantendo o endereço da API fora do bundle público e permitindo alterá-lo em runtime.
+O browser comunica diretamente com o endereço definido em `NEXT_PUBLIC_API_BASE_URL`. Por ser uma variável pública do Next.js, o endereço é incorporado no bundle durante o build. A Web API tem de permitir CORS para a origem do frontend.
 
-Por omissão, não é necessário criar um ficheiro `.env`: o Docker Compose já usa a Web API em `http://host.docker.internal:8080`. Para substituir o endereço, copiar o ficheiro de ambiente adequado:
+Por omissão, não é necessário criar um ficheiro `.env`: o Docker Compose já aponta o browser para a Web API em `http://localhost:8080`. Para substituir o endereço, copiar o ficheiro de ambiente adequado:
 
 ```bash
 cp .env.development.example .env
 ```
 
-2. Preencher o endereço e ativar o modo remoto:
+Preencher o endereço e ativar o modo remoto:
 
 ```env
-API_BASE_URL=http://host.docker.internal:8080
 NEXT_PUBLIC_API_MODE=remote
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 ```
 
-Quando existir um URL de produção público, usar `.env.production.example` como base e substituir `API_BASE_URL`. Como `NEXT_PUBLIC_API_MODE` é usado no bundle, uma mudança entre `mock` e `remote` exige novo build da imagem; `API_BASE_URL` pode ser alterado em runtime.
+Em produção, usar `.env.production.example` como base e substituir `NEXT_PUBLIC_API_BASE_URL` pelo URL público da Web API. Alterar qualquer variável `NEXT_PUBLIC_*` exige um novo build.
+
+## Publicação no Render
+
+Criar um **Static Site** com:
+
+```text
+Build Command: npm ci && npm run build
+Publish Directory: out
+```
+
+Configurar no Static Site:
+
+```env
+NEXT_PUBLIC_API_MODE=remote
+NEXT_PUBLIC_API_BASE_URL=https://nome-da-api.onrender.com
+```
+
+O domínio público, por exemplo `manomana.pt`, deve apontar para o Static Site. A API permanece num Web Service separado e deve permitir CORS para esse domínio.
 
 ## Desenvolvimento local
 
