@@ -23,11 +23,12 @@ type NumberStepperProps = {
   min: number;
   max: number;
   placeholder: number;
+  step?: number;
   suffix: string;
   autoFocus?: boolean;
 };
 
-export function NumberStepper({ label, name, value, onChange, min, max, placeholder, suffix, autoFocus }: NumberStepperProps) {
+export function NumberStepper({ label, name, value, onChange, min, max, placeholder, step = 1, suffix, autoFocus }: NumberStepperProps) {
   const adjust = (amount: number) => {
     const current = value === "" ? placeholder : Number(value);
     onChange(String(Math.min(max, Math.max(min, current + amount))));
@@ -42,12 +43,12 @@ export function NumberStepper({ label, name, value, onChange, min, max, placehol
     <div className="field field--stepper">
       <label className="field__label" htmlFor={name}>{label}</label>
       <div className="number-stepper">
-        <button type="button" onClick={() => adjust(-1)} disabled={value !== "" && Number(value) <= min} aria-label={`Diminuir ${label.toLowerCase()}`}>−</button>
+        <button type="button" onClick={() => adjust(-step)} disabled={value !== "" && Number(value) <= min} aria-label={`Diminuir ${label.toLowerCase()}`}>−</button>
         <span className="number-stepper__value">
-          <input id={name} name={name} type="number" inputMode="numeric" min={min} max={max} step="1" placeholder={String(placeholder)} value={value} onChange={(event) => onChange(event.target.value)} onBlur={normalize} autoFocus={autoFocus} />
+          <input id={name} name={name} type="number" inputMode="numeric" min={min} max={max} step={step} placeholder={String(placeholder)} value={value} onChange={(event) => onChange(event.target.value)} onBlur={normalize} autoFocus={autoFocus} />
           <span>{suffix}</span>
         </span>
-        <button type="button" onClick={() => adjust(1)} disabled={value !== "" && Number(value) >= max} aria-label={`Aumentar ${label.toLowerCase()}`}>+</button>
+        <button type="button" onClick={() => adjust(step)} disabled={value !== "" && Number(value) >= max} aria-label={`Aumentar ${label.toLowerCase()}`}>+</button>
       </div>
     </div>
   );
