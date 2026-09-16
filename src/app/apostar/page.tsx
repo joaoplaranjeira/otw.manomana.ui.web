@@ -11,7 +11,7 @@ import { PredictionSummary } from "@/components/prediction/PredictionSummary";
 import { eventApi } from "@/lib/api/eventApi";
 import { predictionApi } from "@/lib/api/predictionApi";
 import type { GenderPrediction, PredictionRequest } from "@/lib/types";
-import { isValidTimeInput, maskTimeInput } from "@/lib/utils/format";
+import { displayDateToIso, isoDateToDisplay, isValidTimeInput, maskDateInput, maskTimeInput } from "@/lib/utils/format";
 
 const steps = ["nome", "género", "data", "hora", "peso", "altura", "confirmar"];
 const maximumPredictionDate = "2026-10-14";
@@ -28,14 +28,15 @@ export default function PredictionPage() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [gender, setGender] = useState<GenderPrediction>();
-  const [date, setDate] = useState(minimumPredictionDate);
+  const [date, setDate] = useState(() => isoDateToDisplay(minimumPredictionDate));
   const [time, setTime] = useState("");
   const [weight, setWeight] = useState("2500");
   const [height, setHeight] = useState("50");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-  const parsedDate = date >= minimumPredictionDate && date <= maximumPredictionDate ? date : undefined;
+  const isoDate = displayDateToIso(date);
+  const parsedDate = isoDate && isoDate >= minimumPredictionDate && isoDate <= maximumPredictionDate ? isoDate : undefined;
 
   useEffect(() => { eventApi.get().then((event) => { if (event.status !== "Open") router.replace("/resultado"); }).catch((err) => setError(err.message)); }, [router]);
   const value = useMemo<PredictionRequest | undefined>(() => gender ? {
@@ -66,7 +67,7 @@ export default function PredictionPage() {
         <p className="step-label">{String(step + 1).padStart(2, "0")} — {steps[step]}</p>
         {step === 0 && <><h1>Primeiro:<br />quem és?</h1><TextInput autoFocus label="Nome" name="name" placeholder="O teu nome" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required /></>}
         {step === 1 && <><h1>Então... qual é<br />o teu palpite?</h1><GenderChoice value={gender} onChange={setGender} /></>}
-        {step === 2 && <><h1>Quando achas que<br />o Dino vai chegar?</h1><TextInput autoFocus label="Data prevista" name="date" type="date" min={minimumPredictionDate} max={maximumPredictionDate} value={date} onChange={(e) => setDate(e.target.value)} /></>}
+        {step === 2 && <><h1>Quando achas que<br />o Dino vai chegar?</h1><TextInput autoFocus label="Data prevista" name="date" type="text" inputMode="numeric" autoComplete="off" placeholder="dd/mm/yyyy" maxLength={10} pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" value={date} onChange={(e) => setDate(maskDateInput(e.target.value))} /></>}
         {step === 3 && <><h1>E a que horas?</h1><TextInput autoFocus label="Hora prevista" name="time" type="text" inputMode="numeric" autoComplete="off" placeholder="HH:mm" maxLength={5} pattern="([01][0-9]|2[0-3]):[0-5][0-9]" value={time} onChange={(e) => setTime(maskTimeInput(e.target.value))} /></>}
         {step === 4 && <><h1>Quanto vai pesar?</h1><NumberStepper autoFocus label="Peso previsto" name="weight" min={1000} max={6000} placeholder={2500} step={100} suffix="g" value={weight} onChange={setWeight} /></>}
         {step === 5 && <><h1>E quanto vai<br />medir?</h1><NumberStepper autoFocus label="Altura prevista" name="height" min={30} max={70} placeholder={50} suffix="cm" value={height} onChange={setHeight} /></>}
